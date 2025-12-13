@@ -37,11 +37,9 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Serve uploaded files
-app.use('/uploads', express.static('assets/uploads'));
-
-// set up the static files
-app.use(express.static('assets'));
+// Serve uploaded files and static assets
+app.use('/uploads', express.static(path.join(__dirname, 'assets/uploads')));
+app.use('/assets', express.static(path.join(__dirname, 'assets')));
 
 // path: routes\index.js
 app.get('/', require('./routes'));

@@ -11,7 +11,7 @@ body {
     flex-direction: column;
     color: white;
     font-family: 'Poppins', sans-serif;
-    background: linear-gradient(135deg, rgba(24, 26, 27, 0.9) 0%, rgba(29, 32, 33, 0.9) 100%), url('/images/homepage.png');
+    background: linear-gradient(135deg, rgba(24, 26, 27, 0.9) 0%, rgba(29, 32, 33, 0.9) 100%), url('/assets/images/homepage.png');
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
