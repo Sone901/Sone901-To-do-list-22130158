@@ -1,0 +1,311 @@
+<style>
+    /* Avatar Picker Modal */
+    .avatar-picker-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.8);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+
+    .avatar-picker-modal.active {
+        display: flex;
+    }
+
+    .avatar-picker-content {
+        background: #1d2021;
+        border-radius: 15px;
+        padding: 30px;
+        max-width: 800px;
+        width: 90%;
+        max-height: 80vh;
+        overflow-y: auto;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    }
+
+    .avatar-picker-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .avatar-picker-header h3 {
+        color: white;
+        margin: 0;
+        font-size: 1.5rem;
+    }
+
+    .avatar-picker-close {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 2rem;
+        cursor: pointer;
+        padding: 0;
+        width: 40px;
+        height: 40px;
+    }
+
+    .avatar-style-selector {
+        margin-bottom: 20px;
+    }
+
+    .avatar-style-selector label {
+        color: #cfd1d0;
+        display: block;
+        margin-bottom: 10px;
+        font-weight: 600;
+    }
+
+    .avatar-style-selector select {
+        width: 100%;
+        padding: 10px;
+        background: #181a1b;
+        color: white;
+        border: 1px solid #333;
+        border-radius: 5px;
+        font-size: 1rem;
+    }
+
+    .avatar-preview {
+        text-align: center;
+        margin: 20px 0;
+    }
+
+    .avatar-preview img {
+        width: 150px;
+        height: 150px;
+        border-radius: 10px;
+        background: #0aa06f;
+        padding: 10px;
+    }
+
+    .avatar-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 15px;
+        margin: 20px 0;
+    }
+
+    .avatar-option {
+        cursor: pointer;
+        border: 2px solid transparent;
+        border-radius: 10px;
+        padding: 5px;
+        transition: all 0.3s;
+        background: #111213;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .avatar-option:hover {
+        border-color: #0aa06f;
+        transform: scale(1.05);
+    }
+
+    .avatar-option.selected {
+        border-color: #0aa06f;
+        background: #0aa06f;
+    }
+
+    .avatar-option img {
+        width: 80px;
+        height: 80px;
+    }
+
+    .avatar-picker-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+    }
+
+    .avatar-picker-btn {
+        flex: 1;
+        padding: 12px;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .avatar-picker-btn-confirm {
+        background: #0aa06f;
+        color: white;
+    }
+
+    .avatar-picker-btn-confirm:hover {
+        background: #0a8a5f;
+    }
+
+    .avatar-picker-btn-cancel {
+        background: #333;
+        color: white;
+    }
+
+    .avatar-picker-btn-cancel:hover {
+        background: #444;
+    }
+
+    .avatar-edit-btn {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        background: #0aa06f;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .avatar-edit-btn:hover {
+        background: #0a8a5f;
+    }
+</style>
+
+<!-- Avatar Picker Modal -->
+<div class="avatar-picker-modal" id="avatarPickerModal">
+    <div class="avatar-picker-content">
+        <div class="avatar-picker-header">
+            <h3>Choose Your Avatar</h3>
+            <button class="avatar-picker-close" onclick="closeAvatarPicker()">×</button>
+        </div>
+
+        <div class="avatar-style-selector">
+            <label for="avatarStyle">Avatar Style:</label>
+            <select id="avatarStyle" onchange="updateAvatarPreview()">
+                <option value="adventurer">Adventurer</option>
+                <option value="avataaars">Avataaars</option>
+                <option value="bottts">Bottts</option>
+                <option value="croodles">Croodles</option>
+                <option value="fun-emoji">Fun Emoji</option>
+                <option value="glass">Glass</option>
+                <option value="icons">Icons</option>
+                <option value="identicon">Identicon</option>
+                <option value="initials">Initials</option>
+                <option value="lorelei">Lorelei</option>
+                <option value="micah">Micah</option>
+                <option value="miniavs">Miniavs</option>
+                <option value="notionists">Notionists</option>
+                <option value="open-peeps">Open Peeps</option>
+                <option value="personas">Personas</option>
+                <option value="pixel-art">Pixel Art</option>
+                <option value="rings">Rings</option>
+                <option value="shapes">Shapes</option>
+                <option value="thumbs">Thumbs</option>
+            </select>
+        </div>
+
+        <div class="avatar-preview">
+            <p style="color: #cfd1d0; margin-bottom: 10px;">Preview:</p>
+            <img id="avatarPreviewImg" src="https://api.dicebear.com/7.x/adventurer/svg?seed=default" alt="Avatar Preview">
+        </div>
+
+        <div class="avatar-grid" id="avatarGrid">
+            <!-- Generated dynamically -->
+        </div>
+
+        <div class="avatar-picker-actions">
+            <button class="avatar-picker-btn avatar-picker-btn-confirm" onclick="confirmAvatarSelection()">
+                Select Avatar
+            </button>
+            <button class="avatar-picker-btn avatar-picker-btn-cancel" onclick="closeAvatarPicker()">
+                Cancel
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let selectedAvatarSeed = 'default';
+    const avatarSeeds = [
+        'default', 'Felix', 'Aneka', 'Caleb', 'Dominique', 
+        'Elian', 'Fiona', 'Gabriel', 'Harper', 'Ivy',
+        'Jensen', 'Kai', 'Luna', 'Mason', 'Nova',
+        'Oliver', 'Parker', 'Quinn', 'Riley', 'Sam'
+    ];
+
+    function openAvatarPicker() {
+        document.getElementById('avatarPickerModal').classList.add('active');
+        updateAvatarGrid();
+    }
+
+    function closeAvatarPicker() {
+        document.getElementById('avatarPickerModal').classList.remove('active');
+    }
+
+    function updateAvatarPreview() {
+        const style = document.getElementById('avatarStyle').value;
+        const previewImg = document.getElementById('avatarPreviewImg');
+        previewImg.src = `https://api.dicebear.com/7.x/${style}/svg?seed=${selectedAvatarSeed}`;
+    }
+
+    function updateAvatarGrid() {
+        const style = document.getElementById('avatarStyle').value;
+        const grid = document.getElementById('avatarGrid');
+        grid.innerHTML = '';
+
+        avatarSeeds.forEach(seed => {
+            const option = document.createElement('div');
+            option.className = 'avatar-option' + (seed === selectedAvatarSeed ? ' selected' : '');
+            option.innerHTML = `<img src="https://api.dicebear.com/7.x/${style}/svg?seed=${seed}" alt="${seed}">`;
+            option.onclick = () => selectAvatar(seed);
+            grid.appendChild(option);
+        });
+    }
+
+    function selectAvatar(seed) {
+        selectedAvatarSeed = seed;
+        updateAvatarPreview();
+        updateAvatarGrid();
+    }
+
+    async function confirmAvatarSelection() {
+        const style = document.getElementById('avatarStyle').value;
+        
+        try {
+            const response = await fetch('/api/avatar/set', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    style: style,
+                    seed: selectedAvatarSeed
+                })
+            });
+
+            const data = await response.json();
+            
+            if (data.success) {
+                alert('Avatar updated successfully!');
+                closeAvatarPicker();
+                // Refresh the page to show new avatar
+                window.location.reload();
+            } else {
+                alert('Error: ' + data.error);
+            }
+        } catch (err) {
+            console.error('Error:', err);
+            alert('Failed to update avatar');
+        }
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('avatarPickerModal')?.addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeAvatarPicker();
+        }
+    });
+</script>

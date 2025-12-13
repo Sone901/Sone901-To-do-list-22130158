@@ -1,0 +1,291 @@
+<html>
+
+<head>
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/7692/7692809.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css">
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-content">
+            <div class="nav-logo">
+                <img src="https://cdn-icons-png.flaticon.com/512/7692/7692809.png" alt="Logo" class="logo-icon">
+                <span class="logo-text">My To-do list</span>
+            </div>
+            <div class="user-section">
+                <div class="user-menu-container">
+                    <img src="<%= userImage || 'https://api.multiavatar.com/default.svg' %>" alt="User Avatar" class="user-avatar" id="userAvatarBtn">
+                    
+                    <!-- User Dropdown Menu -->
+                    <div class="user-dropdown" id="userDropdown">
+                        <div class="dropdown-header">
+                            <img src="<%= userImage || 'https://api.multiavatar.com/default.svg' %>" alt="User Avatar" class="dropdown-avatar">
+                            <div class="user-info">
+                                <div class="user-name"><%= name %></div>
+                                <div class="user-status">Active</div>
+                            </div>
+                        </div>
+                        <div class="dropdown-divider"></div>
+                        <div class="dropdown-menu">
+                            <a href="/dashboard" class="dropdown-item">
+                                <i class="fas fa-home"></i>
+                                <span>Dashboard</span>
+                            </a>
+                            <a href="/profile" class="dropdown-item">
+                                <i class="fas fa-user"></i>
+                                <span>Profile</span>
+                            </a>
+                        </div>
+                        <div class="dropdown-divider"></div>
+                        <button class="dropdown-logout" onclick="confirmLogout()">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Logout</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container">
+        <div style="width: 100%; max-width: 600px; margin: 0 auto;">
+            <div class="profile-card">
+                <div class="profile-header">
+                    <div class="profile-avatar-wrapper">
+                        <img src="<%= userImage %>" alt="User Avatar" class="profile-avatar" id="previewImage">
+                        <div class="avatar-overlay">
+                            <i class="fas fa-camera"></i>
+                        </div>
+                    </div>
+                    <h1 class="profile-title">My Profile</h1>
+                </div>
+
+                <form action="/profile/update" method="POST" enctype="multipart/form-data" class="profile-form">
+                    <!-- Avatar Upload Section -->
+                    <div class="form-group">
+                        <label>Profile Picture</label>
+                        <div class="image-upload-section">
+                            <div class="upload-tabs">
+                                <button type="button" class="tab-btn active" data-tab="upload">
+                                    <i class="fas fa-upload"></i> Upload from Device
+                                </button>
+                                <button type="button" class="tab-btn" data-tab="url">
+                                    <i class="fas fa-link"></i> Image URL
+                                </button>
+                            </div>
+
+                            <!-- Upload from Device -->
+                            <div class="tab-content active" id="upload-tab">
+                                <div class="file-input-wrapper">
+                                    <input type="file" id="imageFile" name="image" accept="image/*">
+                                    <label for="imageFile" class="file-label">
+                                        <i class="fas fa-image"></i>
+                                        <span>Click to upload or drag and drop</span>
+                                        <small>PNG, JPG, GIF up to 5MB</small>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Image URL -->
+                            <div class="tab-content" id="url-tab">
+                                <input 
+                                    type="text" 
+                                    name="imageUrl" 
+                                    id="imageUrl"
+                                    placeholder="Enter image URL (e.g., https://example.com/image.jpg)"
+                                    value=""
+                                >
+                                <small style="color: #888; margin-top: 5px; display: block;">
+                                    Enter a complete image URL. It will be used as your profile picture.
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="name">Full Name</label>
+                        <input 
+                            type="text" 
+                            id="name" 
+                            name="name" 
+                            value="<%= user.name %>" 
+                            placeholder="Enter your full name"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input 
+                            type="email" 
+                            id="email" 
+                            name="email" 
+                            value="<%= user.email %>" 
+                            placeholder="Enter your email"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label>Account Type</label>
+                        <input 
+                            type="text" 
+                            value="<%= user.authProvider ? user.authProvider.charAt(0).toUpperCase() + user.authProvider.slice(1) : 'Local' %>" 
+                            disabled
+                            style="background-color: #f0f0f0; cursor: not-allowed;"
+                        >
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn-save">
+                            <i class="fas fa-save"></i> Save Changes
+                        </button>
+                        <a href="/dashboard" class="btn-cancel">
+                            <i class="fas fa-arrow-left"></i> Back to Dashboard
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function confirmLogout() {
+            if (confirm('Are you sure you want to logout?')) {
+                window.location.href = '/logout';
+            }
+        }
+
+        // User Dropdown Menu
+        const userAvatarBtn = document.getElementById('userAvatarBtn');
+        const userDropdown = document.getElementById('userDropdown');
+
+        if (userAvatarBtn && userDropdown) {
+            userAvatarBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                userDropdown.classList.toggle('active');
+            });
+
+            document.addEventListener('click', function(event) {
+                const userMenuContainer = document.querySelector('.user-menu-container');
+                if (userMenuContainer && !userMenuContainer.contains(event.target)) {
+                    userDropdown.classList.remove('active');
+                }
+            });
+        }
+
+        // Image Upload Functionality
+        const imageFile = document.getElementById('imageFile');
+        const imageUrl = document.getElementById('imageUrl');
+        const previewImage = document.getElementById('previewImage');
+
+        // File upload preview
+        if (imageFile) {
+            imageFile.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        previewImage.src = event.target.result;
+                        // Clear URL input
+                        imageUrl.value = '';
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        // Image URL preview
+        if (imageUrl) {
+            imageUrl.addEventListener('change', function() {
+                const url = this.value.trim();
+                if (url) {
+                    previewImage.src = url;
+                    // Clear file input
+                    if (imageFile) imageFile.value = '';
+                }
+            });
+
+            imageUrl.addEventListener('blur', function() {
+                const url = this.value.trim();
+                if (url) {
+                    // Verify image URL is valid by checking if it loads
+                    const testImg = new Image();
+                    testImg.onerror = function() {
+                        alert('Invalid image URL. Please check and try again.');
+                        imageUrl.value = '';
+                        previewImage.src = '<%= userImage %>';
+                    };
+                    testImg.src = url;
+                }
+            });
+        }
+
+        // Tab switching
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const tabName = this.getAttribute('data-tab');
+
+                // Remove active class from all buttons and contents
+                tabBtns.forEach(b => b.classList.remove('active'));
+                tabContents.forEach(c => c.classList.remove('active'));
+
+                // Add active class to clicked button and corresponding content
+                this.classList.add('active');
+                document.getElementById(tabName + '-tab').classList.add('active');
+            });
+        });
+
+        // Drag and drop for file input
+        const fileLabel = document.querySelector('.file-label');
+        if (fileLabel) {
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                fileLabel.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                fileLabel.addEventListener(eventName, highlight, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                fileLabel.addEventListener(eventName, unhighlight, false);
+            });
+
+            function highlight(e) {
+                fileLabel.classList.add('highlight');
+            }
+
+            function unhighlight(e) {
+                fileLabel.classList.remove('highlight');
+            }
+
+            fileLabel.addEventListener('drop', handleDrop, false);
+
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                if (imageFile) {
+                    imageFile.files = files;
+                    // Trigger change event
+                    const event = new Event('change', { bubbles: true });
+                    imageFile.dispatchEvent(event);
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>

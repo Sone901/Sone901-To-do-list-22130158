@@ -1,0 +1,464 @@
+<html>
+
+<head>
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/7692/7692809.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css">
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-content">
+            <div class="nav-logo">
+                <img src="https://cdn-icons-png.flaticon.com/512/7692/7692809.png" alt="Logo" class="logo-icon">
+                <span class="logo-text">My To-do list</span>
+            </div>
+            <div class="user-section">
+                <div class="user-menu-container">
+                    <img src="<%= userImage || 'https://api.multiavatar.com/default.svg' %>" alt="User Avatar" class="user-avatar" id="userAvatarBtn">
+                    
+                    <!-- User Dropdown Menu -->
+                    <div class="user-dropdown" id="userDropdown">
+                        <div class="dropdown-header">
+                            <img src="<%= userImage || 'https://api.multiavatar.com/default.svg' %>" alt="User Avatar" class="dropdown-avatar">
+                            <div class="user-info">
+                                <div class="user-name"><%= name %></div>
+                                <div class="user-status">Active</div>
+                            </div>
+                        </div>
+                        <div class="dropdown-divider"></div>
+                        <div class="dropdown-menu">
+                            <a href="/dashboard" class="dropdown-item">
+                                <i class="fas fa-home"></i>
+                                <span>Dashboard</span>
+                            </a>
+                            <a href="/profile" class="dropdown-item">
+                                <i class="fas fa-user"></i>
+                                <span>Profile</span>
+                            </a>
+                        </div>
+                        <div class="dropdown-divider"></div>
+                        <button class="dropdown-logout" onclick="confirmLogout()">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Logout</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Left Column: Projects/Categories -->
+        <div class="left-panel">
+            <div class="panel-title">Projects</div>
+            <div class="projects-list">
+                <div class="project-item active" data-category="work">
+                    <i class="fas fa-briefcase"></i>
+                    <span>Work</span>
+                </div>
+                <div class="project-item" data-category="personal">
+                    <i class="fas fa-user"></i>
+                    <span>Personal</span>
+                </div>
+                <div class="project-item" data-category="shopping">
+                    <i class="fas fa-shopping-bag"></i>
+                    <span>Shopping</span>
+                </div>
+                <div class="project-item" data-category="others">
+                    <i class="fas fa-ellipsis-h"></i>
+                    <span>Others</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Middle Column: Today's Tasks -->
+        <div class="middle-panel">
+            <!-- Search Bar -->
+            <div class="search-bar">
+                <i class="fas fa-search"></i>
+                <input type="text" id="taskSearchInput" placeholder="Search tasks..." class="search-input">
+                <button class="btn-clear-search" id="clearSearchBtn" style="display: none;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <!-- Filter and Sort Controls -->
+            <div class="filter-sort-bar">
+                <div class="filter-group">
+                    <label for="filterDeadline">
+                        <i class="fas fa-calendar"></i> Deadline:
+                    </label>
+                    <select id="filterDeadline" class="filter-select">
+                        <option value="all">All</option>
+                        <option value="today">Today</option>
+                        <option value="week">This Week</option>
+                        <option value="month">This Month</option>
+                        <option value="overdue">Overdue</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="sortBy">
+                        <i class="fas fa-sort"></i> Sort:
+                    </label>
+                    <select id="sortBy" class="filter-select">
+                        <option value="deadline">By Deadline</option>
+                        <option value="created">By Created Date</option>
+                        <option value="title">By Title</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Task Tabs -->
+            <div class="task-tabs">
+                <button class="tab-btn active" data-tab="today">
+                    <i class="fas fa-list-check"></i> Today
+                </button>
+                <button class="tab-btn" data-tab="completed">
+                    <i class="fas fa-check-circle"></i> Completed
+                </button>
+            </div>
+
+            <!-- Today Tab -->
+            <div class="tab-content active" id="today-tab">
+                <div class="panel-header">
+                    <div class="panel-title">TODAY</div>
+                    <button class="btn-add-task" id="addTaskBtn">
+                        <i class="fas fa-plus"></i> Add New Task
+                    </button>
+                </div>
+                
+                <div class="tasks-container" id="todayTasks">
+                    <% for (let task of dashboard) { %>
+                        <% if (!task.completed) { %>
+                            <div class="task-item" data-id="<%= task._id %>">
+                                <div class="task-checkbox">
+                                    <input type="checkbox" class="task-check" onclick="completeTask('<%= task._id %>')">
+                                </div>
+                                <div class="task-content">
+                                    <div class="task-title"><%= task.task %></div>
+                                    <div class="task-description"><%= task.description %></div>
+                                    <div class="task-meta">
+                                        <span class="task-date"><%= task.date %></span>
+                                        <span class="task-category"><%= task.categoryChoosed %></span>
+                                    </div>
+                                </div>
+                                <div class="task-actions">
+                                    <button class="btn-edit" title="Edit" onclick="editTask('<%= task._id %>', '<%- task.task.replace(/'/g, "\\'") %>', '<%- (task.description || '').replace(/'/g, "\\'" ) %>', '<%= task.date %>', '<%= task.categoryChoosed %>')">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <a href="/delete-task/?id=<%= task._id %>" class="btn-delete" title="Delete" onclick="return confirm('Are you sure you want to delete this task?')">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        <% } %>
+                    <% } %>
+                </div>
+            </div>
+
+            <!-- Completed Tab -->
+            <div class="tab-content" id="completed-tab">
+                <div class="panel-header">
+                    <div class="panel-title">COMPLETED TASKS</div>
+                    <div class="completion-stats">
+                        <span class="stat-badge"><%= completedCount %> / <%= totalTasks %></span>
+                    </div>
+                </div>
+                
+                <div class="tasks-container" id="completedTasks">
+                    <% for (let task of dashboard) { %>
+                        <% if (task.completed) { %>
+                            <div class="task-item completed" data-id="<%= task._id %>">
+                                <div class="task-checkbox">
+                                    <input type="checkbox" class="task-check" checked onclick="completeTask('<%= task._id %>')">
+                                </div>
+                                <div class="task-content">
+                                    <div class="task-title"><strike><%= task.task %></strike></div>
+                                    <div class="task-description"><%= task.description %></div>
+                                    <div class="task-meta">
+                                        <span class="task-date"><%= task.date %></span>
+                                        <span class="task-category"><%= task.categoryChoosed %></span>
+                                        <span class="task-status"><i class="fas fa-check"></i> Completed</span>
+                                    </div>
+                                </div>
+                                <div class="task-actions">
+                                    <button class="btn-edit" title="Edit" onclick="editTask('<%= task._id %>', '<%- task.task.replace(/'/g, "\\'") %>', '<%- (task.description || '').replace(/'/g, "\\'" ) %>', '<%= task.date %>', '<%= task.categoryChoosed %>')">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <a href="/delete-task/?id=<%= task._id %>" class="btn-delete" title="Delete" onclick="return confirm('Are you sure you want to delete this task?')">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        <% } %>
+                    <% } %>
+                    
+                    <% if (completedCount === 0) { %>
+                        <div class="no-tasks-message">
+                            <i class="fas fa-inbox"></i>
+                            <p>No completed tasks yet</p>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Upcoming -->
+        <div class="right-panel">
+            <div class="panel-title">Upcoming</div>
+            
+            <!-- Calendar -->
+            <div class="calendar-widget">
+                <div class="calendar-header">
+                    <button class="calendar-nav" id="prevMonth" title="Previous Month">&lt;</button>
+                    <span class="calendar-month" id="currentMonth">January 2025</span>
+                    <button class="calendar-nav" id="nextMonth" title="Next Month">&gt;</button>
+                </div>
+                <div class="calendar-grid" id="calendarGrid"></div>
+            </div>
+
+            <!-- Upcoming Tasks This Week -->
+            <div class="upcoming-section">
+                <div class="section-title">This Week</div>
+                <div class="upcoming-tasks" id="weekTasks">
+                    <% const today = new Date(); %>
+                    <% const weekStart = new Date(today.setDate(today.getDate() - today.getDay())); %>
+                    <% const weekEnd = new Date(weekStart); %>
+                    <% weekEnd.setDate(weekEnd.getDate() + 7); %>
+                    
+                    <% for (let task of dashboard) { %>
+                        <% const taskDate = new Date(task.date); %>
+                        <% if (taskDate >= weekStart && taskDate <= weekEnd && !task.completed) { %>
+                            <div class="upcoming-item">
+                                <div class="upcoming-icon">
+                                    <i class="fas fa-circle"></i>
+                                </div>
+                                <div class="upcoming-content">
+                                    <div class="upcoming-task"><%= task.task %></div>
+                                    <div class="upcoming-date"><%= new Date(task.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) %></div>
+                                </div>
+                            </div>
+                        <% } %>
+                    <% } %>
+                    
+                    <% let hasUpcomingTasks = false; %>
+                    <% for (let task of dashboard) { %>
+                        <% const taskDate = new Date(task.date); %>
+                        <% if (taskDate >= weekStart && taskDate <= weekEnd && !task.completed) { %>
+                            <% hasUpcomingTasks = true; %>
+                            <% break; %>
+                        <% } %>
+                    <% } %>
+                    
+                    <% if (!hasUpcomingTasks) { %>
+                        <div class="no-tasks-message">
+                            <i class="fas fa-calendar-check"></i>
+                            <p>No upcoming tasks this week</p>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Task Modal -->
+    <div class="modal" id="addTaskModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add New Task</h2>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <form action="/addtask" method="post" class="task-form">
+                <div class="form-group">
+                    <label>Task Title</label>
+                    <input type="text" name="task" placeholder="Enter task title" required>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea name="description" placeholder="Enter description" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <select name="categoryChoosed" required>
+                        <option value="">Select category</option>
+                        <option value="work">Work</option>
+                        <option value="personal">Personal</option>
+                        <option value="shopping">Shopping</option>
+                        <option value="others">Others</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Date</label>
+                    <input type="date" name="date" required>
+                </div>
+                <div class="form-group">
+                    <label>Time</label>
+                    <input type="time" name="time">
+                </div>
+                <button type="submit" class="btn-submit">Add Task</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Task Modal -->
+    <div class="modal" id="editTaskModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Task</h2>
+                <button class="modal-close" onclick="closeEditModal()">&times;</button>
+            </div>
+            <form action="/update-task" method="post" class="task-form">
+                <input type="hidden" name="taskId" id="editTaskId">
+                <div class="form-group">
+                    <label>Task Title</label>
+                    <input type="text" name="task" id="editTaskTitle" placeholder="Enter task title" required>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea name="description" id="editTaskDescription" placeholder="Enter description" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <select name="categoryChoosed" id="editTaskCategory" required>
+                        <option value="">Select category</option>
+                        <option value="work">Work</option>
+                        <option value="personal">Personal</option>
+                        <option value="shopping">Shopping</option>
+                        <option value="others">Others</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Date</label>
+                    <input type="date" name="date" id="editTaskDate" required>
+                </div>
+                <div class="form-group">
+                    <label>Time</label>
+                    <input type="time" name="time" id="editTaskTime">
+                </div>
+                <button type="submit" class="btn-submit">Update Task</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="/js/dashboard.js"></script>
+    <script>
+        function confirmLogout() {
+            if (confirm('Are you sure you want to logout?')) {
+                window.location.href = '/logout';
+            }
+        }
+
+        function completeTask(taskId) {
+            window.location.href = '/complete-task/?id=' + taskId;
+        }
+
+        function closeModal() {
+            document.getElementById('addTaskModal').style.display = 'none';
+        }
+
+        function closeEditModal() {
+            document.getElementById('editTaskModal').style.display = 'none';
+        }
+
+        function editTask(taskId, taskTitle, taskDescription, taskDate, taskCategory) {
+            document.getElementById('editTaskId').value = taskId;
+            document.getElementById('editTaskTitle').value = taskTitle;
+            document.getElementById('editTaskDescription').value = taskDescription;
+            document.getElementById('editTaskDate').value = taskDate;
+            document.getElementById('editTaskCategory').value = taskCategory;
+            document.getElementById('editTaskModal').style.display = 'flex';
+        }
+
+        document.getElementById('addTaskBtn').addEventListener('click', function() {
+            document.getElementById('addTaskModal').style.display = 'flex';
+        });
+
+        window.addEventListener('click', function(event) {
+            const addModal = document.getElementById('addTaskModal');
+            const editModal = document.getElementById('editTaskModal');
+            if (event.target === addModal) {
+                addModal.style.display = 'none';
+            }
+            if (event.target === editModal) {
+                editModal.style.display = 'none';
+            }
+        });
+
+        // Initialize calendar
+        let todayDate = new Date();
+        
+        function initCalendar() {
+            const year = todayDate.getFullYear();
+            const month = todayDate.getMonth();
+            
+            document.getElementById('currentMonth').textContent = 
+                new Date(year, month).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+            
+            renderCalendar(year, month);
+        }
+
+        function renderCalendar(year, month) {
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const grid = document.getElementById('calendarGrid');
+            grid.innerHTML = '';
+            
+            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            days.forEach(day => {
+                const dayEl = document.createElement('div');
+                dayEl.className = 'calendar-day-header';
+                dayEl.textContent = day;
+                grid.appendChild(dayEl);
+            });
+            
+            for (let i = 0; i < firstDay.getDay(); i++) {
+                grid.appendChild(document.createElement('div'));
+            }
+            
+            for (let day = 1; day <= lastDay.getDate(); day++) {
+                const dayEl = document.createElement('div');
+                dayEl.className = 'calendar-day';
+                dayEl.textContent = day;
+                if (new Date(year, month, day).toDateString() === todayDate.toDateString()) {
+                    dayEl.classList.add('today');
+                }
+                grid.appendChild(dayEl);
+            }
+        }
+
+        initCalendar();
+
+        // User Dropdown Menu
+        const userAvatarBtn = document.getElementById('userAvatarBtn');
+        const userDropdown = document.getElementById('userDropdown');
+
+        console.log('Avatar btn:', userAvatarBtn);
+        console.log('Dropdown:', userDropdown);
+
+        if (userAvatarBtn && userDropdown) {
+            userAvatarBtn.addEventListener('click', function(e) {
+                console.log('Avatar clicked!');
+                e.stopPropagation();
+                userDropdown.classList.toggle('active');
+                console.log('Dropdown classes:', userDropdown.className);
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(event) {
+                const userMenuContainer = document.querySelector('.user-menu-container');
+                if (userMenuContainer && !userMenuContainer.contains(event.target)) {
+                    userDropdown.classList.remove('active');
+                }
+            });
+        } else {
+            console.error('Avatar or dropdown not found!');
+        }
+    </script>
+</body>
+
+</html>

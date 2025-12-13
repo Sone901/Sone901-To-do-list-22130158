@@ -1,0 +1,79 @@
+<html>
+    <head>
+        <title>Register</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                max-width: 400px;
+                margin: 50px auto;
+                padding: 20px;
+            }
+            form div {
+                margin: 10px 0;
+            }
+            input[type="text"], input[type="email"], input[type="password"] {
+                width: 100%;
+                padding: 8px;
+                box-sizing: border-box;
+            }
+            input[type="submit"] {
+                width: 100%;
+                padding: 10px;
+                background-color: #4CAF50;
+                color: white;
+                border: none;
+                cursor: pointer;
+            }
+            .divider {
+                text-align: center;
+                margin: 20px 0;
+            }
+            .google-btn {
+                width: 100%;
+                padding: 10px;
+                background-color: #4285F4;
+                color: white;
+                border: none;
+                cursor: pointer;
+                text-decoration: none;
+                display: block;
+                text-align: center;
+                margin-top: 10px;
+            }
+            .google-btn:hover {
+                background-color: #357ae8;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Register</h1>
+        <form action="/register" method="post">
+            <div>
+                <input type="text" name="name" id="name" required="required" placeholder="Name">
+            </div>
+            <div>
+                <input type="text" name="lastName" id="lastName" placeholder="Last Name">
+            </div>
+            <div>
+                <input type="text" name="phone" id="phone" placeholder="Phone">
+            </div>
+            <div>
+                <input type="email" name="email" id="email" required="required" placeholder="Email">
+            </div>
+            <div>
+                <input type="password" name="password" id="password" required="required" placeholder="Password">
+            </div>
+            <div>
+                <input type="submit" value="Register">
+            </div>
+        </form>
+        
+        <div class="divider">
+            <strong>OR</strong>
+        </div>
+        
+        <a href="/auth/google" class="google-btn">
+            Sign up with Google
+        </a>
+    </body>
+</html>
