@@ -1,5 +1,6 @@
 const User = require('../models/register');
 const bcrypt = require('bcryptjs');
+const { generateToken, setAuthCookie, clearAuthCookie } = require('../middleware/auth');
 
 module.exports.login = function(req, res) {
     return res.render('login', { 
@@ -27,15 +28,11 @@ module.exports.createSession = async function(req, res) {
             return res.status(401).send('Invalid email or password');
         }
 
-        // Store user in session
-        req.login(user, (err) => {
-            if (err) {
-                console.log('Login error:', err);
-                return res.status(500).send('Error logging in');
-            }
-            console.log('User logged in:', user.email);
-            return res.redirect('/dashboard');
-        });
+        // Generate JWT token and set cookie
+        const token = generateToken(user._id);
+        setAuthCookie(res, token);
+        console.log('User logged in:', user.email);
+        return res.redirect('/dashboard');
 
     } catch (err) {
         console.log('Error:', err);
@@ -44,12 +41,7 @@ module.exports.createSession = async function(req, res) {
 };
 
 module.exports.logout = function(req, res) {
-    req.logout((err) => {
-        if (err) {
-            console.log('Logout error:', err);
-            return res.redirect('/');
-        }
-        console.log('User logged out');
-        return res.redirect('/');
-    });
+    clearAuthCookie(res);
+    console.log('User logged out');
+    return res.redirect('/login');
 };

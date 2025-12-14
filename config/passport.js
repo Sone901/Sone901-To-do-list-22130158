@@ -1,34 +1,8 @@
 const passport = require('passport');
-const LocalStrategy = require('passport-local').Strategy;
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const User = require('../models/register');
-const bcrypt = require('bcryptjs');
 
-// Local Strategy for email/password login
-passport.use(new LocalStrategy({
-    usernameField: 'email',
-    passwordField: 'password'
-}, async (email, password, done) => {
-    try {
-        const user = await User.findOne({ email: email });
-
-        if (!user) {
-            return done(null, false, { message: 'Incorrect email.' });
-        }
-
-        const isPasswordValid = await bcrypt.compare(password, user.password);
-
-        if (!isPasswordValid) {
-            return done(null, false, { message: 'Incorrect password.' });
-        }
-
-        return done(null, user);
-    } catch (err) {
-        return done(err);
-    }
-}));
-
-// Google OAuth Strategy
+// Google OAuth Strategy - LocalStrategy removed (using JWT now)
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
@@ -61,19 +35,6 @@ passport.use(new GoogleStrategy({
     }
 }));
 
-// Serialize user
-passport.serializeUser((user, done) => {
-    done(null, user.id);
-});
-
-// Deserialize user
-passport.deserializeUser(async (id, done) => {
-    try {
-        const user = await User.findById(id);
-        done(null, user);
-    } catch (err) {
-        done(err, null);
-    }
-});
+// Note: serializeUser and deserializeUser removed - using JWT instead of sessions
 
 module.exports = passport;

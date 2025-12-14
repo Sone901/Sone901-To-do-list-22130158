@@ -8,25 +8,29 @@ const completedtaskController = require('../controllers/completedtaskController'
 const avatarController = require('../controllers/avatarController');
 const profileController = require('../controllers/profileController');
 const upload = require('../config/multer');
+const { verifyToken } = require('../middleware/auth');
 
 // path: routes\index.js
 console.log('Router loaded');
 
+// Public routes
 router.get('/', homeController.home);
 router.get('/login', loginController.login);
 router.post('/login', loginController.createSession);
-router.get('/dashboard', dashboardController.dashboard)
 router.get('/register', registerController.register);
 router.post('/register', registerController.createUser);
-router.get('/completedtask', completedtaskController.completedtask);
 
-// Profile routes
-router.get('/profile', profileController.profile);
-router.post('/profile/update', upload.single('image'), profileController.updateProfile);
+// Protected routes - require JWT authentication
+router.get('/dashboard', verifyToken, dashboardController.dashboard);
+router.get('/completedtask', verifyToken, completedtaskController.completedtask);
 
-// Avatar routes
-router.get('/api/avatar-styles', avatarController.getAvatarStyles);
-router.get('/api/avatar/generate', avatarController.generateAvatar);
-router.post('/api/avatar/set', avatarController.setUserAvatar);
+// Profile routes - protected
+router.get('/profile', verifyToken, profileController.profile);
+router.post('/profile/update', verifyToken, upload.single('image'), profileController.updateProfile);
+
+// Avatar routes - protected
+router.get('/api/avatar-styles', verifyToken, avatarController.getAvatarStyles);
+router.get('/api/avatar/generate', verifyToken, avatarController.generateAvatar);
+router.post('/api/avatar/set', verifyToken, avatarController.setUserAvatar);
 
 module.exports = router;

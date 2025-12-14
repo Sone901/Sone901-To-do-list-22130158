@@ -1,5 +1,6 @@
 const User = require('../models/register');
 const bcrypt = require('bcryptjs');
+const { generateToken, setAuthCookie } = require('../middleware/auth');
 
 module.exports.register = function(req, res) {
     return res.render('login', { 
@@ -33,14 +34,10 @@ module.exports.createUser = async function(req, res) {
 
         console.log('User created:', newUser);
 
-        // Auto login after registration
-        req.login(newUser, (err) => {
-            if (err) {
-                console.log('Auto login error:', err);
-                return res.redirect('/login');
-            }
-            return res.redirect('/dashboard');
-        });
+        // Auto login with JWT after registration
+        const token = generateToken(newUser._id);
+        setAuthCookie(res, token);
+        return res.redirect('/dashboard');
 
     } catch (err) {
         console.log('Error creating user:', err);

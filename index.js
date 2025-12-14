@@ -1,17 +1,16 @@
 const express = require('express');
 const port = process.env.PORT || 4000;
 const path = require('path');
-const session = require('express-session');
-const MongoStore = require('connect-mongo');
-const mongoose = require('mongoose');
+const cookieParser = require('cookie-parser');
 const passport = require('passport');
 
 // require the mongoose file
 const db = require('./config/mongoose');
-require('./config/passport');
+require('./config/passport'); // Passport config for Google OAuth
 const User = require('./models/register');
 const Login = require('./models/login');
 const Dashboard = require('./models/dashboard');
+const { verifyToken } = require('./middleware/auth');
 
 const app = express();
 
@@ -22,27 +21,10 @@ app.set('views', path.join(__dirname, 'views'));
 // set up the middleware
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(cookieParser());
 
-// session setup with MongoDB store
-app.use(session({
-    secret: process.env.SESSION_SECRET || 'your-secret-key',
-    resave: false,
-    saveUninitialized: false,
-    store: MongoStore.create({
-        mongoUrl: process.env.mongoDbUrl,
-        touchAfter: 24 * 3600
-    }),
-    cookie: { 
-        secure: process.env.NODE_ENV === 'production',
-        httpOnly: true,
-        sameSite: 'lax',
-        maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
-    }
-}));
-
-// passport middleware
+// Initialize Passport for Google OAuth only (no session)
 app.use(passport.initialize());
-app.use(passport.session());
 
 // Serve uploaded files and static assets
 app.use('/uploads', express.static(path.join(__dirname, 'assets/uploads')));
@@ -66,11 +48,7 @@ app.get('/auth/google/callback', passport.authenticate('google', { failureRedire
 app.get('/logout', authController.logout);
 
 // adding the task to the database
-app.post('/addtask', function(req,res){
-    if (!req.user) {
-        return res.status(401).send('Please log in first');
-    }
-
+app.post('/addtask', verifyToken, function(req,res){
     Dashboard.create({
         userId: req.user._id,
         task : req.body.task,
@@ -90,11 +68,7 @@ app.post('/addtask', function(req,res){
 });
 
 // complate the task to the database
-app.get('/complete-task', function(req,res){
-    if (!req.user) {
-        return res.status(401).send('Please log in first');
-    }
-    
+app.get('/complete-task', verifyToken, function(req,res){
     let id = req.query.id;
     // Verify task belongs to user before updating
     Dashboard.findById(id).then(task => {
@@ -119,11 +93,7 @@ app.get('/complete-task', function(req,res){
 
 
 // deleting the task to the database
-app.get('/delete-task', function(req,res){
-    if (!req.user) {
-        return res.status(401).send('Please log in first');
-    }
-    
+app.get('/delete-task', verifyToken, function(req,res){
     let id = req.query.id;
     // Verify task belongs to user before deleting
     Dashboard.findById(id).then(task => {
@@ -147,11 +117,7 @@ app.get('/delete-task', function(req,res){
 });
 
 // update the task to the database
-app.post('/update-task', function(req,res){
-    if (!req.user) {
-        return res.status(401).send('Please log in first');
-    }
-    
+app.post('/update-task', verifyToken, function(req,res){
     let id = req.body.taskId;
     // Verify task belongs to user before updating
     Dashboard.findById(id).then(task => {
