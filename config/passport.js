@@ -3,21 +3,10 @@ const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const User = require('../models/register');
 
 // Google OAuth Strategy - LocalStrategy removed (using JWT now)
-// Dynamic callback URL based on environment
-const getCallbackURL = () => {
-    if (process.env.VERCEL_URL) {
-        return `https://${process.env.VERCEL_URL}/auth/google/callback`;
-    }
-    if (process.env.NODE_ENV === 'production') {
-        return 'https://sone901-to-do-list-22130158.vercel.app/auth/google/callback';
-    }
-    return 'http://localhost:4000/auth/google/callback';
-};
-
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: getCallbackURL()
+    callbackURL: process.env.GOOGLE_CALLBACK_URL || 'http://localhost:4000/auth/google/callback'
 }, async (accessToken, refreshToken, profile, done) => {
     try {
         let user = await User.findOne({ googleId: profile.id });
