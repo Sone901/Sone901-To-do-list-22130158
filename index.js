@@ -2,6 +2,7 @@ const express = require('express');
 const port = process.env.PORT || 4000;
 const path = require('path');
 const session = require('express-session');
+const MongoStore = require('connect-mongo');
 const passport = require('passport');
 
 // require the mongoose file
@@ -21,11 +22,15 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// session setup
+// session setup with MongoDB store for Vercel
 app.use(session({
     secret: process.env.SESSION_SECRET || 'your-secret-key',
     resave: false,
     saveUninitialized: false,
+    store: MongoStore.create({
+        mongoUrl: process.env.mongoDbUrl,
+        touchAfter: 24 * 3600 // lazy session update (24 hours)
+    }),
     cookie: { 
         secure: process.env.NODE_ENV === 'production', // true on HTTPS
         httpOnly: true,

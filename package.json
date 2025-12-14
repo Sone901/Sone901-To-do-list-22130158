@@ -21,6 +21,7 @@
   "homepage": "https://github.com/Sone901/To-do-list-22130158#readme",
   "dependencies": {
     "bcryptjs": "^2.4.3",
+    "connect-mongo": "^6.0.0",
     "dotenv": "^16.3.1",
     "ejs": "^3.1.8",
     "express": "^4.18.2",
