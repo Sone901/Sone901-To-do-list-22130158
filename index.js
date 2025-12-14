@@ -23,17 +23,12 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// session setup with MongoDB store for Vercel
+// session setup - using memory store for now (Vercel serverless limitation)
+// Note: Sessions will not persist across function invocations
 app.use(session({
     secret: process.env.SESSION_SECRET || 'your-secret-key',
-    resave: false,
-    saveUninitialized: false,
-    store: MongoStore.create({
-        mongoUrl: process.env.mongoDbUrl,
-        collectionName: 'sessions',
-        ttl: 24 * 60 * 60, // 1 day
-        autoRemove: 'native'
-    }),
+    resave: true,
+    saveUninitialized: true,
     cookie: { 
         secure: process.env.NODE_ENV === 'production', // true on HTTPS
         httpOnly: true,
