@@ -28,16 +28,14 @@ app.use(session({
     secret: process.env.SESSION_SECRET || 'your-secret-key',
     resave: false,
     saveUninitialized: false,
-    store: process.env.mongoDbUrl ? MongoStore.create({
+    store: MongoStore.create({
         mongoUrl: process.env.mongoDbUrl,
-        crypto: {
-            secret: process.env.SESSION_SECRET || 'your-secret-key'
-        }
-    }) : undefined,
+        touchAfter: 24 * 3600
+    }),
     cookie: { 
         secure: process.env.NODE_ENV === 'production',
         httpOnly: true,
-        sameSite: 'none', // Required for cross-origin in Vercel
+        sameSite: 'lax',
         maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
     }
 }));
