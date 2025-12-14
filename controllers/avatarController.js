@@ -56,27 +56,36 @@ module.exports.generateAvatar = (req, res) => {
 module.exports.setUserAvatar = async (req, res) => {
     try {
         const { style, seed } = req.body;
-        const avatarUrl = `https://api.dicebear.com/7.x/${style}/svg?seed=${seed}`;
         
         if (!req.user) {
             return res.status(401).json({ error: 'Not authenticated' });
         }
+
+        if (!style || !seed) {
+            return res.status(400).json({ error: 'Style and seed are required' });
+        }
         
-        // Update user avatar
+        const avatarUrl = `https://api.dicebear.com/7.x/${style}/svg?seed=${seed}`;
+        
+        // Update user avatar - use _id not id
         const updatedUser = await User.findByIdAndUpdate(
-            req.user.id,
+            req.user._id,
             { profilePicture: avatarUrl },
             { new: true }
         );
+
+        if (!updatedUser) {
+            return res.status(404).json({ error: 'User not found' });
+        }
         
-        console.log('Avatar updated:', avatarUrl);
+        console.log('Avatar updated for user:', updatedUser.email, '- URL:', avatarUrl);
         return res.json({ 
             success: true, 
             message: 'Avatar updated successfully',
             profilePicture: updatedUser.profilePicture 
         });
     } catch (err) {
-        console.log('Error updating avatar:', err);
-        return res.status(500).json({ error: 'Error updating avatar' });
+        console.error('Error updating avatar:', err);
+        return res.status(500).json({ error: 'Error updating avatar: ' + err.message });
     }
 };
