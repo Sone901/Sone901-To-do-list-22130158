@@ -4,14 +4,20 @@ module.exports.googleAuth = (req, res) => {
 };
 
 module.exports.googleCallback = (req, res) => {
-    if (req.user) {
-        const { generateToken, setAuthCookie } = require('../middleware/auth');
-        const token = generateToken(req.user._id);
-        setAuthCookie(res, token);
-        console.log('Google OAuth user logged in:', req.user.email);
-        res.redirect('/dashboard');
-    } else {
-        res.redirect('/register');
+    try {
+        if (req.user) {
+            const { generateToken, setAuthCookie } = require('../middleware/auth');
+            const token = generateToken(req.user._id);
+            setAuthCookie(res, token);
+            console.log('Google OAuth user logged in:', req.user.email);
+            return res.redirect('/dashboard');
+        } else {
+            console.log('No user found in Google OAuth callback');
+            return res.redirect('/register');
+        }
+    } catch (err) {
+        console.error('Google OAuth callback error:', err);
+        return res.status(500).send('Authentication error: ' + err.message);
     }
 };
 

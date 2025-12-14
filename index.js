@@ -43,8 +43,17 @@ app.post('/profile/update', require('./routes'));
 
 // Google Authentication Routes
 const authController = require('./controllers/authController');
-app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
-app.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/register' }), authController.googleCallback);
+app.get('/auth/google', passport.authenticate('google', { 
+    scope: ['profile', 'email'],
+    session: false 
+}));
+app.get('/auth/google/callback', 
+    passport.authenticate('google', { 
+        failureRedirect: '/register',
+        session: false 
+    }), 
+    authController.googleCallback
+);
 app.get('/logout', authController.logout);
 
 // adding the task to the database
