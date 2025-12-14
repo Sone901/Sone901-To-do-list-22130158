@@ -19,6 +19,9 @@
     "url": "https://github.com/Sone901/To-do-list-22130158/issues"
   },
   "homepage": "https://github.com/Sone901/To-do-list-22130158#readme",
+  "engines": {
+    "node": ">=14.0.0"
+  },
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "connect-mongo": "^6.0.0",
