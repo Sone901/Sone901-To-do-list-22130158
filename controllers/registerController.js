@@ -17,7 +17,11 @@ module.exports.createUser = async function(req, res) {
 
         if (existingUser) {
             console.log('User already exists');
-            return res.status(400).send('Email already registered');
+            return res.render('login', {
+                title: "Register",
+                error: 'Email đã được đăng ký. Vui lòng sử dụng email khác hoặc đăng nhập.',
+                showSignup: true
+            });
         }
 
         // Hash password
@@ -34,13 +38,19 @@ module.exports.createUser = async function(req, res) {
 
         console.log('User created:', newUser);
 
-        // Auto login with JWT after registration
-        const token = generateToken(newUser._id);
-        setAuthCookie(res, token);
-        return res.redirect('/dashboard');
+        // Show success message and redirect to login
+        return res.render('login', {
+            title: "Login",
+            success: 'Đăng ký thành công! Vui lòng đăng nhập để tiếp tục.',
+            showLogin: true
+        });
 
     } catch (err) {
         console.log('Error creating user:', err);
-        return res.status(500).send('Error creating account');
+        return res.render('login', {
+            title: "Register",
+            error: 'Lỗi khi tạo tài khoản: ' + err.message,
+            showSignup: true
+        });
     }
 };

@@ -17,7 +17,11 @@ module.exports.createSession = async function(req, res) {
 
         if (!user) {
             console.log('User not found');
-            return res.status(401).send('Invalid email or password');
+            return res.render('login', {
+                title: "Login",
+                error: 'Email hoặc mật khẩu không đúng',
+                showLogin: true
+            });
         }
 
         // Compare passwords
@@ -25,7 +29,11 @@ module.exports.createSession = async function(req, res) {
 
         if (!isPasswordValid) {
             console.log('Invalid password');
-            return res.status(401).send('Invalid email or password');
+            return res.render('login', {
+                title: "Login",
+                error: 'Email hoặc mật khẩu không đúng',
+                showLogin: true
+            });
         }
 
         // Generate JWT token and set cookie
@@ -36,7 +44,11 @@ module.exports.createSession = async function(req, res) {
 
     } catch (err) {
         console.log('Error:', err);
-        return res.status(500).send('Error logging in');
+        return res.render('login', {
+            title: "Login",
+            error: 'Lỗi đăng nhập: ' + err.message,
+            showLogin: true
+        });
     }
 };
 
