@@ -3,6 +3,7 @@ const port = process.env.PORT || 4000;
 const path = require('path');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
+const mongoose = require('mongoose');
 const passport = require('passport');
 
 // require the mongoose file
@@ -28,12 +29,13 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     store: MongoStore.create({
-        mongoUrl: process.env.mongoDbUrl,
+        client: mongoose.connection.getClient(),
         touchAfter: 24 * 3600 // lazy session update (24 hours)
     }),
     cookie: { 
         secure: process.env.NODE_ENV === 'production', // true on HTTPS
         httpOnly: true,
+        sameSite: 'lax',
         maxAge: 24 * 60 * 60 * 1000 // 24 hours
     }
 }));
