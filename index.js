@@ -44,8 +44,10 @@ app.use('/assets', express.static(path.join(__dirname, 'assets')));
 // path: routes\index.js
 app.get('/', require('./routes'));
 app.get('/login', require('./routes'));
+app.post('/login', require('./routes'));
 app.get('/dashboard', require('./routes'));
 app.get('/register', require('./routes'));
+app.post('/register', require('./routes'));
 app.get('/completedtask', require('./routes'));
 app.get('/profile', require('./routes'));
 app.post('/profile/update', require('./routes'));
