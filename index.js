@@ -29,8 +29,10 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     store: MongoStore.create({
-        client: mongoose.connection.getClient(),
-        touchAfter: 24 * 3600 // lazy session update (24 hours)
+        mongoUrl: process.env.mongoDbUrl,
+        collectionName: 'sessions',
+        ttl: 24 * 60 * 60, // 1 day
+        autoRemove: 'native'
     }),
     cookie: { 
         secure: process.env.NODE_ENV === 'production', // true on HTTPS
